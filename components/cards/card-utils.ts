@@ -66,7 +66,7 @@ export function isCardNumberValidForNetwork(cardNumber: string, network: string)
     case "UnionPay":
       return /^62/.test(s) && len >= 16 && len <= 19
     case "JCB":
-      return prefix4 >= 3528 && prefix4 <= 3589 && len >= 16 && len <= 19
+      return prefix4 >= 3528 && prefix4 <= 3589 && len === 16
 
     default:
       return false

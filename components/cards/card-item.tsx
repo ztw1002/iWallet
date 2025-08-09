@@ -233,13 +233,26 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
         </div>
 
         <div className="mt-7 space-y-2">
-          <div 
-            className="font-semibold tracking-wider whitespace-nowrap overflow-hidden text-right text-2xl"
-            style={{
-              fontSize: '1.5rem',
-              minHeight: '2.25rem',
-              lineHeight: '2.25rem'
-            }}
+          <div
+            className={
+              `font-semibold tracking-wider whitespace-nowrap overflow-hidden text-right ` +
+              (card.network === 'UnionPay' && showCardNumber ? 'text-base' : 'text-2xl')
+            }
+            style={
+              card.network === 'UnionPay' && showCardNumber
+                ? {
+                    fontSize: '1rem',
+                    minHeight: '1.5rem',
+                    lineHeight: '1.5rem',
+                    letterSpacing: '0.08em',
+                    wordBreak: 'break-all',
+                  }
+                : {
+                    fontSize: '1.5rem',
+                    minHeight: '2.25rem',
+                    lineHeight: '2.25rem',
+                  }
+            }
           >
             {formatCardNumber(card.cardNumber, showCardNumber)}
           </div>

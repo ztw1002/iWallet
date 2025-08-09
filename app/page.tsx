@@ -126,8 +126,8 @@ function Dashboard() {
               <CreditCard className="size-5" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-semibold">银行卡管理</h1>
-              <p className="text-sm text-muted-foreground">管理你的卡组织、等级与额度</p>
+              <h1 className="text-xl md:text-2xl font-semibold">Vibe Card</h1>
+              <p className="text-sm text-muted-foreground">Manage your credit card</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ function Dashboard() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="搜索卡号后四位 / 昵称 / 组织"
+              placeholder="搜索卡号后四位 / 备注 / 组织"
               className="pl-9"
             />
           </div>

@@ -163,9 +163,8 @@ export function CardFilters(props: {
           <div className="flex gap-2">
             <button
               onClick={() => props.setNetwork("全部")}
-              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${
-                props.network === "全部" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80"
-              }`}
+              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${props.network === "全部" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80"
+                }`}
             >
               <span className="text-xs">全部</span>
             </button>
@@ -173,14 +172,12 @@ export function CardFilters(props: {
               <button
                 key={n}
                 onClick={() => props.setNetwork(n)}
-                className={`group rounded-md border px-2 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${
-                  props.network === n ? "ring-rose-500 ring-2" : ""
-                }`}
+                className={`group rounded-md border px-2 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${props.network === n ? "ring-rose-500 ring-2" : ""
+                  }`}
               >
                 <div
-                  className={`transition ${
-                    props.network === n ? "grayscale-0 opacity-100 scale-110" : "grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110"
-                  }`}
+                  className={`transition ${props.network === n ? "grayscale-0 opacity-100 scale-110" : "grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110"
+                    }`}
                 >
                   {getNetworkIcon(n)}
                 </div>
@@ -193,16 +190,13 @@ export function CardFilters(props: {
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" className="min-w-28 justify-between bg-transparent">
-            <div className="flex items-center gap-2">
+            <div className={props.level === "全部" ? "flex items-center justify-start w-full" : "flex items-center justify-center w-full"}>
               {props.level === "全部" ? (
                 <span>等级: 全部</span>
               ) : (
-                <>
-                  <div className="w-6">
-                    {getLevelIcon(props.level)}
-                  </div>
-                  <span>{props.level}</span>
-                </>
+                <div className="w-6 flex justify-center">
+                  {getLevelIcon(props.level)}
+                </div>
               )}
             </div>
             <ChevronDown className="ml-2 size-4 opacity-60" />
@@ -212,9 +206,8 @@ export function CardFilters(props: {
           <div className="flex flex-col gap-2">
             <button
               onClick={() => props.setLevel("全部")}
-              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${
-                props.level === "全部" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80"
-              }`}
+              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${props.level === "全部" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80"
+                }`}
             >
               <span className="text-xs">全部</span>
             </button>
@@ -222,14 +215,12 @@ export function CardFilters(props: {
               <button
                 key={l}
                 onClick={() => props.setLevel(l)}
-                className={`group flex items-center justify-center rounded-md border px-2 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${
-                  props.level === l ? "ring-rose-500 ring-2" : ""
-                }`}
+                className={`group flex items-center justify-center rounded-md border px-2 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${props.level === l ? "ring-rose-500 ring-2" : ""
+                  }`}
               >
                 <div
-                  className={`transition ${
-                    props.level === l ? "grayscale-0 opacity-100 scale-110" : "grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110"
-                  }`}
+                  className={`transition ${props.level === l ? "grayscale-0 opacity-100 scale-110" : "grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110"
+                    }`}
                 >
                   {getLevelIcon(l)}
                 </div>
