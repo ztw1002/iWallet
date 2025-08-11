@@ -190,13 +190,16 @@ export function CardFilters(props: {
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" className="min-w-28 justify-between bg-transparent">
-            <div className={props.level === "全部" ? "flex items-center justify-start w-full" : "flex items-center justify-center w-full"}>
+            <div className="flex justify-center items-center gap-2">
               {props.level === "全部" ? (
                 <span>等级: 全部</span>
               ) : (
-                <div className="w-6 flex justify-center">
-                  {getLevelIcon(props.level)}
-                </div>
+                <>
+                  <div className="w-6">
+                    {getLevelIcon(props.level)}
+                  </div>
+                  {/* <span>{props.level}</span> */}
+                </>
               )}
             </div>
             <ChevronDown className="ml-2 size-4 opacity-60" />

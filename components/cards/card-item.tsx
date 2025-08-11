@@ -18,11 +18,11 @@ import { currency, GRADIENTS, maskCardNumber } from "./card-utils"
 import type { BankCard } from "./card-types"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { useCardStore } from "./card-store"
+import { useCardStoreDB } from "./card-store-db"
 
 export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string) => void }) {
   const { toast } = useToast()
-  const del = useCardStore((s) => s.deleteCard)
+  const del = useCardStoreDB((s) => s.deleteCard)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [showCardNumber, setShowCardNumber] = useState(false)
   const gradient = card.color && GRADIENTS[card.color] ? GRADIENTS[card.color] : GRADIENTS["sunset"]
@@ -202,8 +202,13 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
                   <AlertDialogCancel>取消</AlertDialogCancel>
                   <AlertDialogAction
                     className="bg-rose-600 hover:bg-rose-700"
-                    onClick={() => {
-                      del(card.id)
+                    onClick={async () => {
+                      try {
+                        await del(card.id)
+                        toast({ title: "已删除", description: "卡片已删除。" })
+                      } catch {
+                        toast({ title: "删除失败", variant: "destructive" })
+                      }
                     }}
                   >
                     确认删除
@@ -233,26 +238,13 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
         </div>
 
         <div className="mt-7 space-y-2">
-          <div
-            className={
-              `font-semibold tracking-wider whitespace-nowrap overflow-hidden text-right ` +
-              (card.network === 'UnionPay' && showCardNumber ? 'text-base' : 'text-2xl')
-            }
-            style={
-              card.network === 'UnionPay' && showCardNumber
-                ? {
-                    fontSize: '1rem',
-                    minHeight: '1.5rem',
-                    lineHeight: '1.5rem',
-                    letterSpacing: '0.08em',
-                    wordBreak: 'break-all',
-                  }
-                : {
-                    fontSize: '1.5rem',
-                    minHeight: '2.25rem',
-                    lineHeight: '2.25rem',
-                  }
-            }
+          <div 
+            className="font-semibold tracking-wider whitespace-nowrap overflow-hidden text-right text-2xl"
+            style={{
+              fontSize: '1.5rem',
+              minHeight: '2.25rem',
+              lineHeight: '2.25rem'
+            }}
           >
             {formatCardNumber(card.cardNumber, showCardNumber)}
           </div>

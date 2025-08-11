@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -13,21 +13,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CreditCard, Filter, Import, Plus, Search, Settings2, SortAsc, SortDesc, Upload } from "lucide-react"
+import { CreditCard, Filter, Import, Plus, Search, Settings2, SortAsc, SortDesc, Upload, RefreshCw } from "lucide-react"
 import TopNav from "@/components/top-nav"
 import { CardFilters } from "@/components/cards/filters"
 import { CardList } from "@/components/cards/card-list"
-import { useCardStore } from "@/components/cards/card-store"
+import { useCardStoreDB } from "@/components/cards/card-store-db"
 import { CardFormDialog } from "@/components/cards/card-form"
 import type { CardLevel, CardNetwork } from "@/components/cards/card-types"
 import { useToast } from "@/hooks/use-toast"
+import { EnvVarWarning } from "@/components/env-var-warning"
+import { AuthStatus } from "@/components/auth-status"
+import { useAuth } from "@/lib/auth-context"
 
 export default function Page() {
+  const [hasEnvVars, setHasEnvVars] = useState(true)
+  const { user } = useAuth()
+
+  useEffect(() => {
+    // 检查环境变量是否配置
+    const checkEnvVars = () => {
+      const hasUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const hasKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+      setHasEnvVars(!!(hasUrl && hasKey))
+    }
+
+    checkEnvVars()
+  }, [])
+
   return (
     <main className="min-h-[100dvh] bg-gradient-to-b from-rose-50 via-fuchsia-50 to-amber-50">
       <div className="mx-auto max-w-6xl px-4 pb-16">
         <TopNav />
-        <Dashboard />
+
+        {/* 环境变量警告 */}
+        {!hasEnvVars && (
+          <div className="mt-6">
+            <EnvVarWarning />
+          </div>
+        )}
+
+        {/* 认证状态 */}
+        <div className="mt-6">
+          <AuthStatus />
+        </div>
+
+        {/* 卡片管理面板 - 只有登录用户才能看到 */}
+        {user && <Dashboard />}
       </div>
     </main>
   )
@@ -35,7 +66,7 @@ export default function Page() {
 
 function Dashboard() {
   const { toast } = useToast()
-  const cards = useCardStore((s) => s.cards)
+  const { cards, loading, error, stats, fetchCards, syncWithDatabase } = useCardStoreDB()
 
   const [query, setQuery] = useState("")
   const [network, setNetwork] = useState<CardNetwork | "全部">("全部")
@@ -43,6 +74,22 @@ function Dashboard() {
   const [sort, setSort] = useState<"recent" | "limit-asc" | "limit-desc">("recent")
   const [openForm, setOpenForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
+
+  // 用户登录后自动加载卡片数据
+  useEffect(() => {
+    fetchCards()
+  }, [fetchCards])
+
+  // 显示错误信息
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "操作失败",
+        description: error,
+        variant: "destructive",
+      })
+    }
+  }, [error, toast])
 
   const filtered = useMemo(() => {
     let list = [...cards]
@@ -108,13 +155,24 @@ function Dashboard() {
         const text = await file.text()
         const json = JSON.parse(text)
         if (!json || !Array.isArray(json.cards)) throw new Error("Invalid file")
-        useCardStore.getState().importCards(json.cards)
+
+        // 使用数据库存储的导入方法
+        await useCardStoreDB.getState().importCards(json.cards)
         toast({ title: "导入成功", description: `已导入 ${json.cards.length} 张卡片。` })
       } catch {
         toast({ title: "导入失败", variant: "destructive" })
       }
     }
     input.click()
+  }
+
+  async function handleSync() {
+    try {
+      await syncWithDatabase()
+      toast({ title: "同步成功", description: "数据已与数据库同步。" })
+    } catch {
+      toast({ title: "同步失败", variant: "destructive" })
+    }
   }
 
   return (
@@ -126,21 +184,37 @@ function Dashboard() {
               <CreditCard className="size-5" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-semibold">Vibe Card</h1>
-              <p className="text-sm text-muted-foreground">Manage your credit card</p>
+              <h1 className="text-xl md:text-2xl font-semibold">Card Manager</h1>
+              <p className="text-sm text-muted-foreground">
+                管理你的信用卡
+                {stats && (
+                  <span className="ml-2 text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full">
+                    {stats.total_cards} 张卡片 · 总额度 ¥{stats.total_limit.toLocaleString()}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button
               onClick={handleNew}
               className="bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white hover:opacity-90"
+              disabled={loading}
             >
               <Plus className="mr-2 size-4" />
               新增卡片
             </Button>
+            <Button
+              onClick={handleSync}
+              variant="outline"
+              disabled={loading}
+            >
+              <RefreshCw className={`mr-2 size-4 ${loading ? 'animate-spin' : ''}`} />
+              同步数据
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" disabled={loading}>
                   <Settings2 className="mr-2 size-4" />
                   工具
                 </Button>
@@ -156,7 +230,9 @@ function Dashboard() {
                   导入 JSON
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => useCardStore.getState().clear()}>清空本地数据</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => useCardStoreDB.getState().clear()}>
+                  清空本地数据
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -172,12 +248,13 @@ function Dashboard() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜索卡号后四位 / 备注 / 组织"
               className="pl-9"
+              disabled={loading}
             />
           </div>
           <CardFilters network={network} setNetwork={setNetwork} level={level} setLevel={setLevel} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" disabled={loading}>
                 <Filter className="mr-2 size-4" />
                 排序
               </Button>

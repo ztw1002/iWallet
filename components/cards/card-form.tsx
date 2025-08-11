@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { GRADIENTS, defaultGradientByNetwork, formatCardNumberDisplay, luhnCheck, currency, isCardNumberValidForNetwork } from "./card-utils"
 import type { CardLevel, CardNetwork } from "./card-types"
-import { useCardStore } from "./card-store"
-import { Sparkles } from "lucide-react"
+import { useCardStoreDB } from "./card-store-db"
+import { Sparkles, Loader2 } from "lucide-react"
 
 const schema = z
   .object({
@@ -28,9 +28,13 @@ const schema = z
   network: z.enum(["Visa", "Mastercard", "Amex", "UnionPay", "JCB"]),
   level: z.enum(["Standard", "Gold", "Platinum", "Diamond", "Infinite"]),
   limit: z.coerce.number().min(0, "额度不能为负数").max(500000, "额度过大"),
+  expiryDate: z.string().optional(),
+  cardholderName: z.string().max(50).optional(),
+  notes: z.string().max(200).optional(),
+  isFavorite: z.boolean(),
   color: z.string().optional(),
-    annualFeeWaived: z.boolean(),
-    annualFeeCondition: z.string().optional(),
+  annualFeeWaived: z.boolean(),
+  annualFeeCondition: z.string().optional(),
   })
   .superRefine((vals, ctx) => {
     if (!vals.annualFeeWaived) {
@@ -44,9 +48,9 @@ type FormValues = z.infer<typeof schema>
 
 export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean) => void; editId: string | null }) {
   const { toast } = useToast()
-  const add = useCardStore((s) => s.addCard)
-  const update = useCardStore((s) => s.updateCard)
-  const cards = useCardStore((s) => s.cards)
+  const { addCard, updateCard, cards, loading } = useCardStoreDB()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const editing = useMemo(() => cards.find((c) => c.id === props.editId) ?? null, [cards, props.editId])
 
   const form = useForm<FormValues>({
@@ -61,9 +65,13 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
           network: editing.network,
           level: editing.level,
           limit: editing.limit,
-          color: editing.color,
+          expiryDate: editing.expiryDate || "",
+          cardholderName: editing.cardholderName || "",
+          notes: editing.notes || "",
+          isFavorite: editing.isFavorite || false,
+          color: (editing as any).color || undefined,
           annualFeeWaived: (editing as any).annualFeeWaived ?? true,
-          annualFeeCondition: (editing as any).annualFeeCondition ?? "",
+          annualFeeCondition: (editing as any).annualFeeCondition || "",
         }
       : {
           nickname: "",
@@ -71,6 +79,10 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
           network: "Visa",
           level: "Standard",
           limit: 10000,
+          expiryDate: "",
+          cardholderName: "",
+          notes: "",
+          isFavorite: false,
           color: undefined,
           annualFeeWaived: true,
           annualFeeCondition: "",
@@ -78,33 +90,12 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
   })
 
   useEffect(() => {
-    // 注册 limit 字段以便通过滑块更新并参与表单校验
+    // 注册 limit 与 color 字段
     form.register("limit", { valueAsNumber: true })
+    form.register("color")
+    form.register("annualFeeWaived")
+    form.register("annualFeeCondition")
   }, [form])
-
-  // 金额-位置映射：
-  // 0..900 线性映射到 0..500000；900..1000 指数映射到 500000..10000000
-  function amountToPos(amount: number): number {
-    const clamped = Math.max(0, Math.min(10000000, Math.round(amount || 0)))
-    if (clamped <= 500000) {
-      return Math.round((clamped / 500000) * 900)
-    }
-    const ratio = clamped / 500000 // 1..20
-    const t = Math.log(ratio) / Math.log(20) // 0..1
-    return Math.round(900 + t * 100)
-  }
-
-  function posToAmount(pos: number): number {
-    const p = Math.max(0, Math.min(1000, Math.round(pos)))
-    if (p <= 900) {
-      return Math.round((p / 900) * 500000)
-    }
-    const t = (p - 900) / 100 // 0..1
-    const ratio = Math.pow(20, t) // 1..20
-    return Math.round(500000 * ratio)
-  }
-
-  // 线性滑块实现后不再需要额外的 sliderPos 状态
 
   useEffect(() => {
     if (editing) {
@@ -114,9 +105,13 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
         network: editing.network,
         level: editing.level,
         limit: editing.limit,
-        color: editing.color,
-        annualFeeWaived: (editing as any).annualFeeWaived ?? true,
-        annualFeeCondition: (editing as any).annualFeeCondition ?? "",
+        expiryDate: editing.expiryDate || "",
+        cardholderName: editing.cardholderName || "",
+        notes: editing.notes || "",
+        isFavorite: editing.isFavorite || false,
+        color: (editing as any).color || undefined,
+        annualFeeWaived: (editing as any).annualFeeWaived || false,
+        annualFeeCondition: (editing as any).annualFeeCondition || "",
       })
     } else {
       form.reset({
@@ -125,8 +120,12 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
         network: "Visa",
         level: "Standard",
         limit: 10000,
+        expiryDate: "",
+        cardholderName: "",
+        notes: "",
+        isFavorite: false,
         color: undefined,
-        annualFeeWaived: true,
+        annualFeeWaived: false,
         annualFeeCondition: "",
       })
     }
@@ -192,8 +191,6 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
     )
   }
 
-
-
   // 等级图标（简化版彩色标签）
   function LevelBadge(props: { label: string; bg: string; fg?: string }) {
     return (
@@ -219,16 +216,29 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
     return <LevelBadge label="Infinite" bg="#111827" />
   }
 
-  function onSubmit(values: FormValues) {
-    const color = values.color || defaultGradientByNetwork(values.network)
-    if (editing) {
-      update(editing.id, { ...values, color })
-      toast({ title: "已更新", description: "卡片信息已保存。" })
-    } else {
-      const id = add({ ...values, color })
-      toast({ title: "已创建", description: "新增卡片成功。" })
+  async function onSubmit(values: FormValues) {
+    if (isSubmitting) return
+    
+    setIsSubmitting(true)
+    try {
+      if (editing) {
+        await updateCard(editing.id, { ...values, color: (values as any).color })
+        toast({ title: "已更新", description: "卡片信息已保存。" })
+      } else {
+        await addCard({ ...values, color: (values as any).color })
+        toast({ title: "已创建", description: "新增卡片成功。" })
+      }
+      props.onOpenChange(false)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "操作失败"
+      toast({ 
+        title: "操作失败", 
+        description: errorMessage,
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-    props.onOpenChange(false)
   }
 
   const gradientKeys = Object.keys(GRADIENTS)
@@ -368,6 +378,48 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
             )}
           </div>
 
+          {/* 有效期
+          <div className="grid gap-2">
+            <Label htmlFor="expiryDate">有效期（可选）</Label>
+            <Input 
+              id="expiryDate" 
+              type="date" 
+              placeholder="选择有效期"
+              {...form.register("expiryDate")} 
+            />
+          </div> */}
+
+          {/* 持卡人姓名 */}
+          {/* <div className="grid gap-2">
+            <Label htmlFor="cardholderName">持卡人姓名（可选）</Label>
+            <Input 
+              id="cardholderName" 
+              placeholder="持卡人姓名"
+              {...form.register("cardholderName")} 
+            />
+          </div> */}
+
+          {/* 备注
+          <div className="grid gap-2">
+            <Label htmlFor="notes">备注（可选）</Label>
+            <Input 
+              id="notes" 
+              placeholder="其他备注信息"
+              {...form.register("notes")} 
+            />
+          </div> */}
+
+          {/* 收藏状态 */}
+          <div className="flex items-center gap-2">
+            <input
+              id="isFavorite"
+              type="checkbox"
+              className="h-4 w-4"
+              {...form.register("isFavorite")}
+            />
+            <Label htmlFor="isFavorite">收藏此卡片</Label>
+          </div>
+
           {/* 年费 */}
           <div className="grid gap-2">
             <Label>年费<span className="ml-0.5 text-rose-600">*</span></Label>
@@ -408,54 +460,52 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
             )}
           </div>
 
+          {/* 卡面风格 */}
           <div className="grid gap-2">
             <Label>卡面风格</Label>
             <div className="flex justify-center">
               <div className="grid gap-2">
                 <div className="grid grid-cols-5 gap-2">
-                  {/* 第一行：前5个颜色 */}
                   {gradientKeys.slice(0, 5).map((k) => (
                     <button
                       aria-label={`选择 ${k}`}
                       type="button"
                       key={k}
-                      onClick={() => form.setValue("color", k)}
+                      onClick={() => form.setValue("color", k as any)}
                       className={`h-10 w-16 rounded-xl bg-gradient-to-br ${GRADIENTS[k]} ring-2 transition ${
-                        form.watch("color") === k ? "ring-rose-500" : "ring-transparent"
+                        (form.watch as any)("color") === k ? "ring-rose-500" : "ring-transparent"
                       }`}
                       title={k}
                     />
                   ))}
                 </div>
                 <div className="grid grid-cols-5 gap-2">
-                  {/* 第二行：后4个颜色 + 随机生成按钮 */}
                   {gradientKeys.slice(5, 9).map((k) => (
                     <button
                       aria-label={`选择 ${k}`}
                       type="button"
                       key={k}
-                      onClick={() => form.setValue("color", k)}
+                      onClick={() => form.setValue("color", k as any)}
                       className={`h-10 w-16 rounded-xl bg-gradient-to-br ${GRADIENTS[k]} ring-2 transition ${
-                        form.watch("color") === k ? "ring-rose-500" : "ring-transparent"
+                        (form.watch as any)("color") === k ? "ring-rose-500" : "ring-transparent"
                       }`}
                       title={k}
                     />
                   ))}
-                  {/* 随机生成按钮，与上方第五个按钮大小相同，位置对齐 */}
                   <button
                     type="button"
                     onClick={() => {
-                      const current = form.watch("color")
+                      const current = (form.watch as any)("color")
                       const pool = gradientKeys.filter((k) => k !== current)
                       const pick = (pool.length ? pool : gradientKeys)[Math.floor(Math.random() * (pool.length ? pool.length : gradientKeys.length))]!
-                      form.setValue("color", pick)
+                      form.setValue("color", pick as any)
                     }}
                     className={`h-10 w-16 rounded-xl text-xs text-white transition relative ${
-                      form.watch("color")
-                        ? `bg-gradient-to-br ${GRADIENTS[form.watch("color")!]}`
+                      (form.watch as any)("color")
+                        ? `bg-gradient-to-br ${(GRADIENTS as any)[(form.watch as any)("color")]}`
                         : "rgb-border-flow"
                     }`}
-                    style={{ border: form.watch("color") ? "0" : "0" }}
+                    style={{ border: (form.watch as any)("color") ? "0" : "0" }}
                     title="随机生成一个颜色并预览"
                   >
                     随机
@@ -466,11 +516,15 @@ export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => props.onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => props.onOpenChange(false)} disabled={isSubmitting}>
               取消
             </Button>
-            <Button type="submit" className="bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white hover:opacity-90">
-              <Sparkles className="mr-2 size-4" />
+            <Button type="submit" className="bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white hover:opacity-90" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 size-4" />
+              )}
               {editing ? "保存" : "创建"}
             </Button>
           </div>

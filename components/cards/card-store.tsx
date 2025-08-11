@@ -45,20 +45,20 @@ export const useCardStore = create<Store>()(
           cards: get().cards.map((c) =>
             c.id === id
               ? {
-                  ...c,
-                  ...patch,
-                  cardNumber: patch.cardNumber ? formatCardNumberDisplay(patch.cardNumber) : c.cardNumber,
-                  limit: typeof patch.limit === "number" ? Math.max(0, Math.round(patch.limit)) : c.limit,
-                  color: patch.color ?? c.color,
-                  annualFeeWaived: typeof patch.annualFeeWaived === "boolean" ? patch.annualFeeWaived : c.annualFeeWaived,
-                  annualFeeCondition:
-                    typeof patch.annualFeeWaived === "boolean"
-                      ? patch.annualFeeWaived
-                        ? undefined
-                        : (patch.annualFeeCondition ?? c.annualFeeCondition ?? "")
-                      : (patch.annualFeeCondition ?? c.annualFeeCondition),
-                  updatedAt: now,
-                }
+                ...c,
+                ...patch,
+                cardNumber: patch.cardNumber ? formatCardNumberDisplay(patch.cardNumber) : c.cardNumber,
+                limit: typeof patch.limit === "number" ? Math.max(0, Math.round(patch.limit)) : c.limit,
+                color: patch.color ?? c.color,
+                annualFeeWaived: typeof patch.annualFeeWaived === "boolean" ? patch.annualFeeWaived : c.annualFeeWaived,
+                annualFeeCondition:
+                  typeof patch.annualFeeWaived === "boolean"
+                    ? patch.annualFeeWaived
+                      ? undefined
+                      : (patch.annualFeeCondition ?? c.annualFeeCondition ?? "")
+                    : (patch.annualFeeCondition ?? c.annualFeeCondition),
+                updatedAt: now,
+              }
               : c,
           ),
         })

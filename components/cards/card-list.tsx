@@ -13,7 +13,14 @@ export function CardList({
   if (cards.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed p-8 text-center bg-white/70">
-        <p className="text-sm text-muted-foreground">还没有卡片，点击 新增卡片 开始吧。</p>
+        <p className="text-sm text-muted-foreground mb-4">还没有卡片，点击下方按钮开始吧。</p>
+        <button
+          type="button"
+          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
+          onClick={() => onEdit("")}
+        >
+          新增卡片
+        </button>
       </div>
     )
   }
