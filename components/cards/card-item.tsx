@@ -19,6 +19,7 @@ import type { BankCard } from "./card-types"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { useCardStoreDB } from "./card-store-db"
+import { motion } from "framer-motion"
 
 export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string) => void }) {
   const { toast } = useToast()
@@ -105,8 +106,6 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
     )
   }
 
-
-
   function getNetworkIcon(network: string) {
     switch (network) {
       case "Visa":
@@ -168,72 +167,117 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-rose-100 transition hover:shadow-md hover:scale-105">
-      <div className={`m-3 rounded-2xl p-5 text-white bg-gradient-to-br ${gradient} shadow-inner`}>
+    <motion.div 
+      className="group relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-rose-100 transition-all duration-300 hover:shadow-lg"
+      whileHover={{ 
+        scale: 1.02,
+        transition: { duration: 0.2 }
+      }}
+    >
+      <div className={`m-3 rounded-2xl p-5 text-white bg-gradient-to-br ${gradient} shadow-inner relative`}>
+        {/* 年费状态 - 右上角 */}
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/20 rounded-full px-2 py-1">
+          {card.annualFeeWaived ? (
+            <>
+              <span className="text-xs">✅</span>
+              <span className="text-xs text-white/90">已免</span>
+            </>
+          ) : (
+            <>
+              <span className="text-xs">⭕️</span>
+              <span className="text-xs text-white/90">未免</span>
+            </>
+          )}
+        </div>
+
         <div className="flex items-start justify-between">
           <div></div>
-          <div className="flex items-center gap-2 opacity-0 transition group-hover:opacity-100">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
-              onClick={() => onEdit(card.id)}
-              title="编辑"
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-4 group-hover:translate-x-0">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.2 }}
             >
-              <Edit2 className="size-4" />
-            </Button>
-            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
-                  title="删除"
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>删除卡片？</AlertDialogTitle>
-                  <AlertDialogDescription>此操作无法撤销。</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-rose-600 hover:bg-rose-700"
-                    onClick={async () => {
-                      try {
-                        await del(card.id)
-                        toast({ title: "已删除", description: "卡片已删除。" })
-                      } catch {
-                        toast({ title: "删除失败", variant: "destructive" })
-                      }
-                    }}
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                onClick={() => onEdit(card.id)}
+                title="编辑"
+              >
+                <Edit2 className="size-4" />
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.2 }}
+            >
+              <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                    title="删除"
                   >
-                    确认删除
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
-              onClick={handleCopy}
-              title="复制卡号"
+                    <Trash2 className="size-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>删除卡片？</AlertDialogTitle>
+                    <AlertDialogDescription>此操作无法撤销。</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-rose-600 hover:bg-rose-700"
+                      onClick={async () => {
+                        try {
+                          await del(card.id)
+                          toast({ title: "已删除", description: "卡片已删除。" })
+                        } catch {
+                          toast({ title: "删除失败", variant: "destructive" })
+                        }
+                      }}
+                    >
+                      确认删除
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.2 }}
             >
-              <Copy className="size-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
-              onClick={() => setShowCardNumber(!showCardNumber)}
-              title={showCardNumber ? "隐藏卡号" : "显示卡号"}
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                onClick={handleCopy}
+                title="复制卡号"
+              >
+                <Copy className="size-4" />
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, duration: 0.2 }}
             >
-              {showCardNumber ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                onClick={() => setShowCardNumber(!showCardNumber)}
+                title={showCardNumber ? "隐藏卡号" : "显示卡号"}
+              >
+                {showCardNumber ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -248,25 +292,9 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
           >
             {formatCardNumber(card.cardNumber, showCardNumber)}
           </div>
-          {/* <div className="flex items-center gap-2 text-sm text-white/90">
-            {getLevelIcon(card.level)}
-          </div> */}
         </div>
 
-        <div className="mt-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {card.annualFeeWaived ? (
-              <>
-                <CheckCircle2 className="size-4" />
-                <span className="text-sm text-white/90">已免</span>
-              </>
-            ) : (
-              <>
-                <Circle className="size-4" />
-                <span className="text-sm text-white/90">未免</span>
-              </>
-            )}
-          </div>
+        <div className="mt-6 flex items-center justify-end">
           <div className="w-16">
             {getNetworkIcon(card.network)}
           </div>
@@ -284,6 +312,6 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

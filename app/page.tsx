@@ -22,8 +22,44 @@ import { CardFormDialog } from "@/components/cards/card-form"
 import type { CardLevel, CardNetwork } from "@/components/cards/card-types"
 import { useToast } from "@/hooks/use-toast"
 import { EnvVarWarning } from "@/components/env-var-warning"
-import { AuthStatus } from "@/components/auth-status"
 import { useAuth } from "@/lib/auth-context"
+
+// 问候语组件
+function Greeting() {
+  const { user } = useAuth()
+  const [greeting, setGreeting] = useState("")
+
+  useEffect(() => {
+    const getGreeting = () => {
+      const hour = new Date().getHours()
+      let timeGreeting = ""
+      
+      if (hour >= 5 && hour < 12) {
+        timeGreeting = "早上好"
+      } else if (hour >= 12 && hour < 18) {
+        timeGreeting = "下午好"
+      } else if (hour >= 18 && hour < 22) {
+        timeGreeting = "晚上好"
+      } else {
+        timeGreeting = "晚上好"
+      }
+      
+      return `${timeGreeting}，${user?.email?.split('@')[0] || '用户'}`
+    }
+    
+    setGreeting(getGreeting())
+  }, [user])
+
+  if (!user) return null
+
+  return (
+    <div className="mt-6 mb-4">
+      <h1 className="text-4xl font-bold text-gray-800">
+        {greeting}
+      </h1>
+    </div>
+  )
+}
 
 export default function Page() {
   const [hasEnvVars, setHasEnvVars] = useState(true)
@@ -52,10 +88,8 @@ export default function Page() {
           </div>
         )}
 
-        {/* 认证状态 */}
-        <div className="mt-6">
-          <AuthStatus />
-        </div>
+        {/* 问候语 */}
+        <Greeting />
 
         {/* 卡片管理面板 - 只有登录用户才能看到 */}
         {user && <Dashboard />}
@@ -184,7 +218,7 @@ function Dashboard() {
               <CreditCard className="size-5" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-semibold">Card Manager</h1>
+              <h1 className="text-xl md:text-2xl font-semibold">iCard</h1>
               <p className="text-sm text-muted-foreground">
                 管理你的信用卡
                 {stats && (

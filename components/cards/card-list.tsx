@@ -1,5 +1,9 @@
 "use client"
 
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Grid3X3, Grid } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { BankCard } from "./card-types"
 import { CardItem } from "./card-item"
 
@@ -10,6 +14,8 @@ export function CardList({
   cards: BankCard[]
   onEdit: (id: string) => void
 }) {
+  const [viewMode, setViewMode] = useState<"compact" | "normal">("normal")
+
   if (cards.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed p-8 text-center bg-white/70">
@@ -24,11 +30,64 @@ export function CardList({
       </div>
     )
   }
+
+  // 响应式网格布局
+  const gridClass = viewMode === "compact" 
+    ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" 
+    : "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {cards.map((c) => (
-        <CardItem key={c.id} card={c} onEdit={onEdit} />
-      ))}
+    <div className="space-y-4">
+      {/* 视图切换按钮 */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 bg-white/70 backdrop-blur rounded-lg p-1 ring-1 ring-rose-100">
+          <Button
+            variant={viewMode === "normal" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("normal")}
+            className={viewMode === "normal" ? "bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white" : ""}
+          >
+            <Grid3X3 className="h-4 w-4 mr-1" />
+            三列
+          </Button>
+          <Button
+            variant={viewMode === "compact" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("compact")}
+            className={viewMode === "compact" ? "bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white" : ""}
+          >
+            <Grid className="h-4 w-4 mr-1" />
+            五列
+          </Button>
+        </div>
+      </div>
+
+      {/* 卡片网格 */}
+      <div className={gridClass}>
+        <AnimatePresence mode="popLayout">
+          {cards.map((card, index) => (
+            <motion.div
+              key={card.id}
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -20 }}
+              transition={{
+                duration: 0.4,
+                delay: Math.min(index * 0.05, 0.5), // 限制最大延迟为0.5秒
+                ease: [0.25, 0.46, 0.45, 0.94] // 使用更平滑的缓动函数
+              }}
+              layout
+              layoutId={card.id}
+              whileHover={{ 
+                scale: 1.02,
+                transition: { duration: 0.2 }
+              }}
+            >
+              <CardItem card={card} onEdit={onEdit} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
