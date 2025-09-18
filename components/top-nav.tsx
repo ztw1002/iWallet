@@ -14,6 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 
 export default function TopNav() {
   const { user, loading, signOut } = useAuth()
@@ -38,13 +39,8 @@ export default function TopNav() {
         </Link>
 
         <nav className="flex items-center gap-4">
+          <ThemeSwitcher />
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground">
-              概览
-            </a>
-            <a href="#" className="hover:text-foreground">
-              统计
-            </a>
             <a href="#" className="hover:text-foreground">
               设置
             </a>
