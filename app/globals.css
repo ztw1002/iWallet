@@ -23,6 +23,14 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  /* 按钮背景颜色变量 - 浅色模式 */
+  --button-bg: oklch(0.97 0 0);
+  --button-bg-hover: oklch(0.95 0 0);
+  --button-outline-bg: oklch(1 0 0);
+  --button-outline-bg-hover: oklch(0.97 0 0);
+  /* 选中状态颜色 - 浅色模式 */
+  --selection-bg: oklch(0.8 0 0);
+  --selection-text: oklch(0.145 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -40,38 +48,51 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  /* 纯黑背景 */
+  --background: oklch(0 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
+  --card: oklch(0.1 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
+  --popover: oklch(0.1 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.15 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(0.15 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.2 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --border: oklch(0.2 0 0);
+  /* 输入框背景 - 深灰色，在纯黑背景上更清晰 */
+  --input: oklch(0.15 0 0);
+  --ring: oklch(0.6 0 0);
+  /* 按钮背景颜色变量 - 夜间模式统一使用灰色 */
+  --button-bg: oklch(0.4 0 0);
+  --button-bg-hover: oklch(0.5 0 0);
+  --button-outline-bg: oklch(0.3 0 0);
+  --button-outline-bg-hover: oklch(0.4 0 0);
+  /* 主按钮在夜间模式也使用灰色 */
+  --primary: oklch(0.5 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  /* 选中状态颜色 */
+  --selection-bg: oklch(0.4 0 0);
+  --selection-text: oklch(0.985 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.1 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.15 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-border: oklch(0.2 0 0);
+  --sidebar-ring: oklch(0.6 0 0);
 }
 
 @theme inline {
@@ -94,6 +115,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-button-bg: var(--button-bg);
+  --color-button-bg-hover: var(--button-bg-hover);
+  --color-button-outline-bg: var(--button-outline-bg);
+  --color-button-outline-bg-hover: var(--button-outline-bg-hover);
+  --color-selection-bg: var(--selection-bg);
+  --color-selection-text: var(--selection-text);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -117,8 +144,22 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply bg-background;
+  }
   body {
     @apply bg-background text-foreground;
+    /* 确保夜间模式背景是纯黑色 */
+    @apply dark:bg-[#000000];
+  }
+  /* 选中状态颜色 */
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-text);
+  }
+  ::-moz-selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-text);
   }
 }
 

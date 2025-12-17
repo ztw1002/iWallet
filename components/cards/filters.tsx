@@ -163,7 +163,7 @@ export function CardFilters(props: {
           <div className="flex gap-2">
             <button
               onClick={() => props.setNetwork("全部")}
-              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${props.network === "全部" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80"
+              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${props.network === "全部" ? "bg-primary text-primary-foreground dark:bg-[var(--button-bg)] dark:text-foreground" : "bg-secondary hover:bg-secondary/80 dark:bg-[var(--button-bg)] dark:hover:bg-[var(--button-bg-hover)] dark:text-foreground"
                 }`}
             >
               <span className="text-xs">全部</span>
@@ -172,7 +172,7 @@ export function CardFilters(props: {
               <button
                 key={n}
                 onClick={() => props.setNetwork(n)}
-                className={`group rounded-md border px-2 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${props.network === n ? "ring-rose-500 ring-2" : ""
+                className={`group rounded-md border px-2 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 dark:bg-[var(--button-bg)] dark:hover:bg-[var(--button-bg-hover)] dark:border-input ${props.network === n ? "ring-rose-500 ring-2 dark:ring-gray-500" : ""
                   }`}
               >
                 <div
@@ -209,7 +209,7 @@ export function CardFilters(props: {
           <div className="flex flex-col gap-2">
             <button
               onClick={() => props.setLevel("全部")}
-              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${props.level === "全部" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80"
+              className={`flex items-center justify-center rounded-md border px-2 py-1 transition ${props.level === "全部" ? "bg-primary text-primary-foreground dark:bg-[var(--button-bg)] dark:text-foreground" : "bg-secondary hover:bg-secondary/80 dark:bg-[var(--button-bg)] dark:hover:bg-[var(--button-bg-hover)] dark:text-foreground"
                 }`}
             >
               <span className="text-xs">全部</span>
@@ -218,7 +218,7 @@ export function CardFilters(props: {
               <button
                 key={l}
                 onClick={() => props.setLevel(l)}
-                className={`group flex items-center justify-center rounded-md border px-2 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${props.level === l ? "ring-rose-500 ring-2" : ""
+                className={`group flex items-center justify-center rounded-md border px-2 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 dark:bg-[var(--button-bg)] dark:hover:bg-[var(--button-bg-hover)] dark:border-input ${props.level === l ? "ring-rose-500 ring-2 dark:ring-gray-500" : ""
                   }`}
               >
                 <div

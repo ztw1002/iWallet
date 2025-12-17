@@ -121,3 +121,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .surface-panel {
+    border: 1px solid;
+    border-color: color-mix(in oklch, var(--border) 80%, var(--background) 20%);
+    background-color: color-mix(in oklch, var(--card) 92%, var(--background) 8%);
+    box-shadow: 0 20px 45px color-mix(in oklch, var(--border) 20%, transparent);
+  }
+
+  .surface-panel-soft {
+    background-color: color-mix(in oklch, var(--card) 85%, var(--background) 15%);
+  }
+
+  .surface-panel-muted {
+    background-color: color-mix(in oklch, var(--card) 75%, var(--background) 25%);
+  }
+
+  .surface-panel-glass {
+    background-color: color-mix(in oklch, var(--background) 90%, var(--card) 10%);
+    backdrop-filter: blur(24px);
+  }
+
+  .surface-border-strong {
+    border-color: var(--border);
+  }
+}

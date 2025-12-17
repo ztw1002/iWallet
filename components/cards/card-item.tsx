@@ -168,7 +168,7 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
 
   return (
     <motion.div 
-      className="group relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-rose-100 transition-all duration-300 hover:shadow-lg"
+      className="group relative overflow-hidden rounded-3xl surface-panel surface-panel-muted surface-border-strong transition-all duration-300 hover:shadow-lg"
       whileHover={{ 
         scale: 1.02,
         transition: { duration: 0.2 }
@@ -201,7 +201,7 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                className="h-8 w-8 bg-slate-100 dark:bg-slate-800 border border-white/70 dark:border-white/80 text-foreground hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm"
                 onClick={() => onEdit(card.id)}
                 title="编辑"
               >
@@ -218,7 +218,7 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                    className="h-8 w-8 bg-slate-100 dark:bg-slate-800 border border-white/70 dark:border-white/80 text-foreground hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm"
                     title="删除"
                   >
                     <Trash2 className="size-4" />
@@ -256,7 +256,7 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                className="h-8 w-8 bg-slate-100 dark:bg-slate-800 border border-white/70 dark:border-white/80 text-foreground hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm"
                 onClick={handleCopy}
                 title="复制卡号"
               >
@@ -271,7 +271,7 @@ export function CardItem({ card, onEdit }: { card: BankCard; onEdit: (id: string
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-8 w-8 bg-white/20 border-0 text-white hover:bg-white/30"
+                className="h-8 w-8 bg-slate-100 dark:bg-slate-800 border border-white/70 dark:border-white/80 text-foreground hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm"
                 onClick={() => setShowCardNumber(!showCardNumber)}
                 title={showCardNumber ? "隐藏卡号" : "显示卡号"}
               >

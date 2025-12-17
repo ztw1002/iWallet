@@ -18,11 +18,11 @@ export function CardList({
 
   if (cards.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed p-8 text-center bg-white/70">
+      <div className="rounded-3xl surface-panel surface-panel-soft surface-border-strong border-dashed p-8 text-center">
         <p className="text-sm text-muted-foreground mb-4">还没有卡片，点击下方按钮开始吧。</p>
         <button
           type="button"
-          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
+          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white rounded-lg hover:opacity-90 transition"
           onClick={() => onEdit("")}
         >
           新增卡片
@@ -40,7 +40,7 @@ export function CardList({
     <div className="space-y-4">
       {/* 视图切换按钮 */}
       <div className="flex justify-end">
-        <div className="flex items-center gap-2 bg-white/70 backdrop-blur rounded-lg p-1 ring-1 ring-rose-100">
+        <div className="flex items-center gap-2 surface-panel surface-panel-glass surface-border-strong backdrop-blur rounded-lg p-1 ring-1 ring-[color:var(--border)] ring-opacity-60">
           <Button
             variant={viewMode === "normal" ? "default" : "ghost"}
             size="sm"

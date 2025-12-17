@@ -167,9 +167,24 @@ export const useCardStoreDB = create<Store>()(
           
           set({ cards, loading: false })
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : '获取卡片失败'
+          // 详细记录错误信息
+          const errorDetails = error instanceof Error 
+            ? {
+                message: error.message,
+                name: error.name,
+                stack: error.stack
+              }
+            : { error }
+          
+          console.error('Error fetching cards:', errorDetails)
+          
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : typeof error === 'string' 
+              ? error 
+              : JSON.stringify(error, null, 2)
+          
           set({ error: errorMessage, loading: false })
-          console.error('Error fetching cards:', error)
         }
       },
 

@@ -38,9 +38,34 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_supabase_anon_key
 
 ### 2. 获取项目配置
 
-1. 在项目仪表板中，进入 **Settings** → **API**
-2. 复制 **Project URL** 到 `NEXT_PUBLIC_SUPABASE_URL`
-3. 复制 **anon public** 密钥到 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+#### 详细步骤：
+
+1. **进入 API 设置页面**
+   - 在项目 Dashboard 左侧菜单，点击 **Settings**（设置图标）
+   - 选择 **API** 选项
+
+2. **复制 Project URL**
+   - 在页面顶部找到 **Project URL** 部分
+   - 格式类似：`https://xxxxxxxxxxxxx.supabase.co`
+   - 点击右侧的复制按钮 📋
+   - 粘贴到 `.env.local` 文件的 `NEXT_PUBLIC_SUPABASE_URL`
+
+3. **复制 anon public 密钥**
+   - 在页面中找到 **Project API keys** 部分
+   - 找到 **anon public** 这一行（注意：不是 service_role）
+   - 点击右侧的 **Reveal**（显示）按钮（如果密钥被隐藏）
+   - 点击复制按钮 📋 复制完整的密钥
+   - 粘贴到 `.env.local` 文件的 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+
+#### 快速访问：
+- 直接链接：`https://supabase.com/dashboard/project/_/settings/api`
+- 将 `_` 替换为你的项目 ID
+
+#### 配置示例：
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://abcdefghijklmnop.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiY2RlZmdoaWprbG1ub3AiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYzODk2NzI4MCwiZXhwIjoxOTU0NTQzMjgwfQ.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
 ### 3. 配置认证设置
 

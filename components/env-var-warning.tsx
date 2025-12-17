@@ -6,19 +6,19 @@ import Link from "next/link";
 
 export function EnvVarWarning() {
   return (
-    <Alert className="border-amber-200 bg-amber-50">
+    <Alert className="border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/40">
       <AlertTriangle className="h-4 w-4 text-amber-600" />
-      <AlertTitle className="text-amber-800">需要配置 Supabase</AlertTitle>
-      <AlertDescription className="text-amber-700">
+      <AlertTitle className="text-amber-800 dark:text-amber-200">需要配置 Supabase</AlertTitle>
+      <AlertDescription className="text-amber-700 dark:text-amber-100">
         <div className="mt-2 space-y-2">
-          <p>
-            请创建 <code className="rounded bg-amber-100 px-1 py-0.5 text-xs">.env.local</code> 文件并配置以下环境变量：
-          </p>
+            <p>
+              请创建 <code className="rounded bg-amber-100 px-1 py-0.5 text-xs dark:bg-amber-900/60 dark:text-amber-200">.env.local</code> 文件并配置以下环境变量：
+            </p>
           <div className="space-y-1 text-sm">
-            <code className="block rounded bg-amber-100 px-2 py-1">
+              <code className="block rounded bg-amber-100 px-2 py-1 dark:bg-amber-900/60 dark:text-amber-200">
               NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
             </code>
-            <code className="block rounded bg-amber-100 px-2 py-1">
+              <code className="block rounded bg-amber-100 px-2 py-1 dark:bg-amber-900/60 dark:text-amber-200">
               NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your_supabase_anon_key
             </code>
           </div>

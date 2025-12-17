@@ -12,7 +12,7 @@ export function AuthStatus() {
 
   if (loading) {
     return (
-      <Card className="bg-white/70 backdrop-blur-md ring-1 ring-rose-100">
+      <Card className="surface-panel surface-panel-soft surface-border-strong backdrop-blur-md ring-1 ring-[color:var(--border)] ring-opacity-60">
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-rose-500"></div>
@@ -25,7 +25,7 @@ export function AuthStatus() {
 
   if (user) {
     return (
-      <Card className="bg-white/70 backdrop-blur-md ring-1 ring-rose-100">
+      <Card className="surface-panel surface-panel-soft surface-border-strong backdrop-blur-md ring-1 ring-[color:var(--border)] ring-opacity-60">
         <CardHeader className="text-right">
           <CardTitle className="flex items-center gap-2 justify-end">
             <Shield className="h-5 w-5 text-green-600" />
@@ -69,7 +69,7 @@ export function AuthStatus() {
   }
 
   return (
-    <Card className="bg-white/70 backdrop-blur-md ring-1 ring-rose-100">
+    <Card className="surface-panel surface-panel-soft surface-border-strong backdrop-blur-md ring-1 ring-[color:var(--border)] ring-opacity-60">
       <CardHeader className="text-right">
         <CardTitle className="flex items-center gap-2 justify-end">
           <LogIn className="h-5 w-5 text-amber-600" />

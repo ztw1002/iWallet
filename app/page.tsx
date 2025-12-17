@@ -38,8 +38,6 @@ function Greeting() {
         timeGreeting = "早上好"
       } else if (hour >= 12 && hour < 18) {
         timeGreeting = "下午好"
-      } else if (hour >= 18 && hour < 22) {
-        timeGreeting = "晚上好"
       } else {
         timeGreeting = "晚上好"
       }
@@ -54,7 +52,7 @@ function Greeting() {
 
   return (
     <div className="mt-6 mb-4">
-      <h1 className="text-4xl font-bold text-gray-800">
+      <h1 className="text-4xl font-bold text-foreground">
         {greeting}
       </h1>
     </div>
@@ -77,7 +75,7 @@ export default function Page() {
   }, [])
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-b from-rose-50 via-fuchsia-50 to-amber-50">
+    <main className="min-h-[100dvh] bg-gradient-to-b from-rose-50 via-fuchsia-50 to-amber-50 dark:from-[#030611] dark:via-[#04040d] dark:to-[#010103] text-foreground">
       <div className="mx-auto max-w-6xl px-4 pb-16">
         <TopNav />
 
@@ -211,18 +209,18 @@ function Dashboard() {
 
   return (
     <section className="mt-6">
-      <div className="rounded-3xl bg-white/70 backdrop-blur-md ring-1 ring-rose-100 shadow-sm p-5 md:p-6">
+      <div className="rounded-3xl surface-panel surface-panel-soft surface-border-strong backdrop-blur-md ring-1 ring-[color:var(--border)] shadow-sm p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 via-fuchsia-500 to-amber-400 text-white shadow-md">
               <CreditCard className="size-5" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-semibold">iCard</h1>
+              <h1 className="text-xl md:text-2xl font-semibold">iWallet</h1>
               <p className="text-sm text-muted-foreground">
-                管理你的信用卡
+                Manage your credit cards
                 {stats && (
-                  <span className="ml-2 text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full">
+                  <span className="ml-2 text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full dark:bg-rose-900/40 dark:text-rose-200">
                     {stats.total_cards} 张卡片 · 总额度 ¥{stats.total_limit.toLocaleString()}
                   </span>
                 )}
@@ -311,9 +309,9 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="mt-6">
-        <Tabs defaultValue="all">
-          <TabsList className="bg-white/70 backdrop-blur ring-1 ring-rose-100">
+        <div className="mt-6">
+          <Tabs defaultValue="all">
+          <TabsList className="surface-panel surface-panel-glass ring-1 ring-[color:var(--border)] ring-opacity-70 backdrop-blur">
             <TabsTrigger value="all">全部</TabsTrigger>
             <TabsTrigger value="favor">高额度</TabsTrigger>
           </TabsList>
@@ -323,8 +321,8 @@ function Dashboard() {
           <TabsContent value="favor" className="mt-6">
             <CardList cards={filtered.filter((c) => c.limit >= 50000)} onEdit={handleEdit} />
           </TabsContent>
-        </Tabs>
-      </div>
+          </Tabs>
+        </div>
 
       <CardFormDialog open={openForm} onOpenChange={setOpenForm} editId={editId} />
     </section>

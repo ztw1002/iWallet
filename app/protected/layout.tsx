@@ -8,7 +8,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-b from-rose-50 via-fuchsia-50 to-amber-50">
+    <main className="min-h-[100dvh] bg-gradient-to-b from-rose-50 via-fuchsia-50 to-amber-50 dark:bg-[#000000]">
       <div className="mx-auto max-w-6xl px-4 pb-16">
         <TopNav />
         

@@ -40,18 +40,82 @@ export interface UpdateCardData extends Partial<CreateCardData> {
 }
 
 export class CardService {
-  private supabase = createClient()
+  private getSupabase() {
+    try {
+      return createClient()
+    } catch (error) {
+      throw new Error(
+        "Supabase 环境变量未配置。请创建 .env.local 文件并配置 NEXT_PUBLIC_SUPABASE_URL 和 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY"
+      )
+    }
+  }
 
   // 获取用户的所有卡片
   async getUserCards(): Promise<Card[]> {
-    const { data, error } = await this.supabase
+    const supabase = this.getSupabase()
+    
+    // 先检查用户是否登录
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      throw new Error('未登录，请先登录后再获取卡片')
+    }
+
+    const { data, error } = await supabase
       .from('user_cards')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching user cards:', error)
-      throw new Error(`获取卡片失败: ${error.message}`)
+      // 详细记录错误信息
+      console.error('Error fetching user cards:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        fullError: JSON.stringify(error, null, 2)
+      })
+      
+      // 提供更详细的错误信息
+      if (error.code === 'PGRST116' || error.message?.includes('does not exist') || error.message?.includes('不存在')) {
+        throw new Error(
+          '数据库表不存在。请在 Supabase 仪表板的 SQL Editor 中运行 supabase-setup.sql 脚本来创建表。\n\n' +
+          '详细步骤：\n' +
+          '1. 访问 https://supabase.com/dashboard\n' +
+          '2. 选择你的项目\n' +
+          '3. 进入 SQL Editor\n' +
+          '4. 运行项目根目录下的 supabase-setup.sql 脚本'
+        )
+      }
+      
+      if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('权限')) {
+        throw new Error(
+          '权限不足。请检查 RLS (Row Level Security) 策略是否正确配置。\n\n' +
+          '解决方案：在 Supabase SQL Editor 中运行 supabase-setup.sql 脚本以创建 RLS 策略。'
+        )
+      }
+      
+      // 处理网络错误
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        throw new Error(
+          '网络连接失败。请检查：\n' +
+          '1. 网络连接是否正常\n' +
+          '2. Supabase 项目是否正常运行\n' +
+          '3. 环境变量配置是否正确'
+        )
+      }
+      
+      // 通用错误信息
+      const errorMessage = error.message || '未知错误'
+      const errorCode = error.code || '未知'
+      throw new Error(
+        `获取卡片失败: ${errorMessage}\n` +
+        `错误代码: ${errorCode}\n\n` +
+        `请检查：\n` +
+        `1. 数据库表是否已创建（运行 supabase-setup.sql）\n` +
+        `2. 用户是否已登录\n` +
+        `3. RLS 策略是否正确配置\n` +
+        `4. 查看浏览器控制台获取更多信息`
+      )
     }
 
     return this.mapDatabaseCardsToCards(data || [])
@@ -59,7 +123,8 @@ export class CardService {
 
   // 创建新卡片（必须带上 user_id 以满足 RLS 与 NOT NULL 约束）
   async createCard(cardData: CreateCardData): Promise<Card> {
-    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    const supabase = this.getSupabase()
+    const { data: userData, error: userError } = await supabase.auth.getUser()
     if (userError) {
       throw new Error(`获取用户失败: ${userError.message}`)
     }
@@ -80,7 +145,7 @@ export class CardService {
       expiry_date: normalizedExpiry,
     }]
 
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('user_cards')
       .insert(insertPayload)
       .select()
@@ -108,7 +173,8 @@ export class CardService {
       updateData.expiry_date = updateData.expiry_date && updateData.expiry_date !== '' ? updateData.expiry_date : null
     }
     
-    const { data, error } = await this.supabase
+    const supabase = this.getSupabase()
+    const { data, error } = await supabase
       .from('user_cards')
       .update(updateData)
       .eq('id', id)
@@ -125,7 +191,8 @@ export class CardService {
 
   // 删除卡片
   async deleteCard(cardId: string): Promise<void> {
-    const { error } = await this.supabase
+    const supabase = this.getSupabase()
+    const { error } = await supabase
       .from('user_cards')
       .delete()
       .eq('id', cardId)
@@ -138,8 +205,9 @@ export class CardService {
 
   // 切换卡片收藏状态
   async toggleFavorite(cardId: string): Promise<Card> {
+    const supabase = this.getSupabase()
     // 先获取当前状态
-    const { data: currentCard, error: fetchError } = await this.supabase
+    const { data: currentCard, error: fetchError } = await supabase
       .from('user_cards')
       .select('is_favorite')
       .eq('id', cardId)
@@ -151,7 +219,7 @@ export class CardService {
     }
 
     // 切换状态
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('user_cards')
       .update({ is_favorite: !currentCard.is_favorite })
       .eq('id', cardId)
@@ -168,7 +236,8 @@ export class CardService {
 
   // 搜索卡片
   async searchCards(query: string): Promise<Card[]> {
-    const { data, error } = await this.supabase
+    const supabase = this.getSupabase()
+    const { data, error } = await supabase
       .from('user_cards')
       .select('*')
       .or(`card_number.ilike.%${query}%,nickname.ilike.%${query}%,network.ilike.%${query}%`)
@@ -190,7 +259,8 @@ export class CardService {
     maxLimit?: number
     isFavorite?: boolean
   }): Promise<Card[]> {
-    let query = this.supabase
+    const supabase = this.getSupabase()
+    let query = supabase
       .from('user_cards')
       .select('*')
 
@@ -232,14 +302,66 @@ export class CardService {
     max_limit: number
     min_limit: number
   }> {
-    const { data, error } = await this.supabase
+    const supabase = this.getSupabase()
+    
+    // 先检查用户是否登录
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      // 如果未登录，返回默认值
+      return {
+        total_cards: 0,
+        total_limit: 0,
+        avg_limit: 0,
+        max_limit: 0,
+        min_limit: 0
+      }
+    }
+
+    const { data, error } = await supabase
       .from('user_card_stats')
       .select('*')
       .maybeSingle()
 
     if (error) {
       console.error('Error fetching card stats:', error)
-      throw new Error(`获取统计信息失败: ${error.message}`)
+      
+      // 如果视图不存在，尝试从 user_cards 表直接计算
+      if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+        console.warn('统计视图不存在，从 user_cards 表直接计算统计信息')
+        try {
+          const cards = await this.getUserCards()
+          const total_limit = cards.reduce((sum, card) => sum + card.limit, 0)
+          const avg_limit = cards.length > 0 ? Math.round(total_limit / cards.length) : 0
+          const max_limit = cards.length > 0 ? Math.max(...cards.map(c => c.limit)) : 0
+          const min_limit = cards.length > 0 ? Math.min(...cards.map(c => c.limit)) : 0
+          
+          return {
+            total_cards: cards.length,
+            total_limit,
+            avg_limit,
+            max_limit,
+            min_limit
+          }
+        } catch (calcError) {
+          // 如果计算也失败，返回默认值
+          return {
+            total_cards: 0,
+            total_limit: 0,
+            avg_limit: 0,
+            max_limit: 0,
+            min_limit: 0
+          }
+        }
+      }
+      
+      // 其他错误，返回默认值而不是抛出异常
+      return {
+        total_cards: 0,
+        total_limit: 0,
+        avg_limit: 0,
+        max_limit: 0,
+        min_limit: 0
+      }
     }
 
     return {
