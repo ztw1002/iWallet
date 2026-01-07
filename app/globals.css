@@ -255,3 +255,32 @@
 @keyframes rgb-angle-spin {
   to { --angle: 1turn; }
 }
+
+/* 卡片横向滚动动画 - 无限循环 */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  /* 使用 will-change 优化动画性能 */
+  will-change: transform;
+  animation: scroll 25s linear infinite;
+}
+
+/* 鼠标悬停时暂停动画 */
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* 使用 GPU 加速优化性能 */
+.animate-scroll > * {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+

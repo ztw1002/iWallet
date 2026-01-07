@@ -23,6 +23,7 @@ import type { CardLevel, CardNetwork } from "@/components/cards/card-types"
 import { useToast } from "@/hooks/use-toast"
 import { EnvVarWarning } from "@/components/env-var-warning"
 import { useAuth } from "@/lib/auth-context"
+import { LandingPage } from "@/components/landing-page"
 
 // 问候语组件
 function Greeting() {
@@ -33,7 +34,7 @@ function Greeting() {
     const getGreeting = () => {
       const hour = new Date().getHours()
       let timeGreeting = ""
-      
+
       if (hour >= 5 && hour < 12) {
         timeGreeting = "早上好"
       } else if (hour >= 12 && hour < 18) {
@@ -41,18 +42,18 @@ function Greeting() {
       } else {
         timeGreeting = "晚上好"
       }
-      
+
       return `${timeGreeting}，${user?.email?.split('@')[0] || '用户'}`
     }
-    
+
     setGreeting(getGreeting())
   }, [user])
 
   if (!user) return null
 
   return (
-    <div className="mt-6 mb-4">
-      <h1 className="text-4xl font-bold text-foreground">
+    <div className="mt-4 mb-2">
+      <h1 className="text-3xl font-bold text-foreground">
         {greeting}
       </h1>
     </div>
@@ -75,7 +76,7 @@ export default function Page() {
   }, [])
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-b from-rose-50 via-fuchsia-50 to-amber-50 dark:from-[#030611] dark:via-[#04040d] dark:to-[#010103] text-foreground">
+    <main className="min-h-[100dvh] bg-gradient-to-b from-[#fffbe8] via-[#f7f2e4] to-[#eee8d5] dark:from-[#1a1a1a] dark:via-[#0f0f0f] dark:to-[#0a0a0a] text-foreground">
       <div className="mx-auto max-w-6xl px-4 pb-16">
         <TopNav />
 
@@ -86,11 +87,16 @@ export default function Page() {
           </div>
         )}
 
-        {/* 问候语 */}
-        <Greeting />
+        {/* 未登录用户 - 显示宣传页面 */}
+        {!user && <LandingPage />}
 
-        {/* 卡片管理面板 - 只有登录用户才能看到 */}
-        {user && <Dashboard />}
+        {/* 已登录用户 - 显示问候语和管理面板 */}
+        {user && (
+          <>
+            <Greeting />
+            <Dashboard />
+          </>
+        )}
       </div>
     </main>
   )
@@ -208,16 +214,16 @@ function Dashboard() {
   }
 
   return (
-    <section className="mt-6">
-      <div className="rounded-3xl surface-panel surface-panel-soft surface-border-strong backdrop-blur-md ring-1 ring-[color:var(--border)] shadow-sm p-5 md:p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="mt-4">
+      <div className="rounded-3xl surface-panel surface-panel-soft surface-border-strong backdrop-blur-md ring-1 ring-[color:var(--border)] shadow-sm p-4 md:p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 via-fuchsia-500 to-amber-400 text-white shadow-md">
+            <div className="inline-flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 via-fuchsia-500 to-amber-400 text-white shadow-md">
               <CreditCard className="size-5" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-semibold">iWallet</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-lg md:text-xl font-semibold">iWallet</h1>
+              <p className="text-xs text-muted-foreground">
                 Manage your credit cards
                 {stats && (
                   <span className="ml-2 text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full dark:bg-rose-900/40 dark:text-rose-200">
@@ -232,6 +238,7 @@ function Dashboard() {
               onClick={handleNew}
               className="bg-gradient-to-r from-rose-500 to-fuchsia-500 text-white hover:opacity-90"
               disabled={loading}
+              size="sm"
             >
               <Plus className="mr-2 size-4" />
               新增卡片
@@ -240,13 +247,14 @@ function Dashboard() {
               onClick={handleSync}
               variant="outline"
               disabled={loading}
+              size="sm"
             >
               <RefreshCw className={`mr-2 size-4 ${loading ? 'animate-spin' : ''}`} />
               同步数据
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={loading}>
+                <Button variant="outline" disabled={loading} size="sm">
                   <Settings2 className="mr-2 size-4" />
                   工具
                 </Button>
@@ -270,7 +278,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <Separator className="my-5" />
+        <Separator className="my-4" />
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
           <div className="relative flex-1">
@@ -279,14 +287,14 @@ function Dashboard() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜索卡号后四位 / 备注 / 组织"
-              className="pl-9"
+              className="pl-9 h-9"
               disabled={loading}
             />
           </div>
           <CardFilters network={network} setNetwork={setNetwork} level={level} setLevel={setLevel} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" disabled={loading}>
+              <Button variant="outline" disabled={loading} size="sm">
                 <Filter className="mr-2 size-4" />
                 排序
               </Button>
@@ -309,16 +317,16 @@ function Dashboard() {
         </div>
       </div>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <Tabs defaultValue="all">
           <TabsList className="surface-panel surface-panel-glass ring-1 ring-[color:var(--border)] ring-opacity-70 backdrop-blur">
             <TabsTrigger value="all">全部</TabsTrigger>
             <TabsTrigger value="favor">高额度</TabsTrigger>
           </TabsList>
-          <TabsContent value="all" className="mt-6">
+          <TabsContent value="all" className="mt-4">
             <CardList cards={filtered} onEdit={handleEdit} />
           </TabsContent>
-          <TabsContent value="favor" className="mt-6">
+          <TabsContent value="favor" className="mt-4">
             <CardList cards={filtered.filter((c) => c.limit >= 50000)} onEdit={handleEdit} />
           </TabsContent>
           </Tabs>

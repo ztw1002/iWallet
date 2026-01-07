@@ -20,11 +20,16 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
+        {/* Maple Mono 字体 CDN - 使用 fontsource */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.1.1/index.css"
+        />
         <style>{`
 html {
-  font-family: ${GeistSans.style.fontFamily};
+  font-family: 'Maple Mono', ${GeistSans.style.fontFamily};
   --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
+  --font-mono: 'Maple Mono', ${GeistMono.variable};
 }
         `}</style>
       </head>
