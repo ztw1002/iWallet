@@ -1,9 +1,8 @@
 "use client"
 
 import { useEffect, useState, memo } from "react"
-import { GRADIENTS } from "./cards/card-utils"
+import { GRADIENTS, maskCardNumber } from "./cards/card-utils"
 import type { CardNetwork, CardLevel, BankCard } from "./cards/card-types"
-import { CardItem } from "./cards/card-item"
 
 // 生成随机示例卡片数据
 function generateSampleCards(count: number): BankCard[] {
@@ -202,114 +201,26 @@ function getLevelIcon(level: string) {
 const DisplayCard = memo(function DisplayCard({ card }: { card: BankCard }) {
   const gradient = card.color && GRADIENTS[card.color] ? GRADIENTS[card.color] : GRADIENTS["sunset"]
 
-  // 根据卡组织确定卡号长度和字体大小
-  const getCardNumberStyle = () => {
+  // 根据卡组织确定字号，仅用于排版；号码统一展示后四位
+  const cardNumberStyle = (() => {
     const cardNumberLength = card.cardNumber.replace(/\s/g, '').length
 
-    // Amex: 15位，较大字号
     if (card.network === 'Amex') {
-      return {
-        fontSize: '1.35rem',
-        letterSpacing: '0.05em',
-        format: (num: string) => {
-          const digits = num.replace(/\D/g, '')
-          if (digits.length === 15) {
-            return `•••• •••••• •${digits.slice(-5)}`
-          }
-          return `•••• •••• •••• ${digits.slice(-4)}`
-        }
-      }
+      return { fontSize: '1.35rem', letterSpacing: '0.05em' }
     }
 
-    // Visa: 13-19位，较小字号以适应更长卡号
     if (card.network === 'Visa') {
-      return {
-        fontSize: cardNumberLength <= 16 ? '1.4rem' : '1.2rem',
-        letterSpacing: '0.03em',
-        format: (num: string) => {
-          const digits = num.replace(/\D/g, '')
-          // Visa 13位: 4-6-3 格式
-          // Visa 16位: 4-4-4-4 格式
-          // Visa 19位: 6-6-6-1 格式
-          if (digits.length === 13) {
-            return `•••• •••••• •${digits.slice(-3)}`
-          } else if (digits.length === 16) {
-            return `•••• •••• •••• ${digits.slice(-4)}`
-          } else if (digits.length === 19) {
-            return `•••••• •••••• •${digits.slice(-1)}`
-          }
-          return `•••• •••• •••• ${digits.slice(-4)}`
-        }
-      }
+      return { fontSize: cardNumberLength <= 16 ? '1.4rem' : '1.2rem', letterSpacing: '0.03em' }
     }
 
-    // Mastercard: 16位，标准字号
-    if (card.network === 'Mastercard') {
-      return {
-        fontSize: '1.4rem',
-        letterSpacing: '0.04em',
-        format: (num: string) => {
-          const digits = num.replace(/\D/g, '')
-          return `•••• •••• •••• ${digits.slice(-4)}`
-        }
-      }
+    if (card.network === 'UnionPay' || card.network === 'JCB') {
+      return { fontSize: cardNumberLength <= 16 ? '1.35rem' : '1.15rem', letterSpacing: '0.03em' }
     }
 
-    // UnionPay: 16-19位，动态调整字号
-    if (card.network === 'UnionPay') {
-      return {
-        fontSize: cardNumberLength <= 16 ? '1.35rem' : '1.15rem',
-        letterSpacing: '0.03em',
-        format: (num: string) => {
-          const digits = num.replace(/\D/g, '')
-          if (digits.length === 16) {
-            return `•••• •••• •••• ${digits.slice(-4)}`
-          } else if (digits.length === 17) {
-            return `••••• ••••• •• ${digits.slice(-2)}`
-          } else if (digits.length === 18) {
-            return `••••• ••••• ••• ${digits.slice(-3)}`
-          } else if (digits.length === 19) {
-            return `•••••• •••••• •${digits.slice(-1)}`
-          }
-          return `•••• •••• •••• ${digits.slice(-4)}`
-        }
-      }
-    }
+    return { fontSize: '1.4rem', letterSpacing: '0.04em' }
+  })()
 
-    // JCB: 16-19位，动态调整字号
-    if (card.network === 'JCB') {
-      return {
-        fontSize: cardNumberLength <= 16 ? '1.35rem' : '1.15rem',
-        letterSpacing: '0.03em',
-        format: (num: string) => {
-          const digits = num.replace(/\D/g, '')
-          if (digits.length === 16) {
-            return `•••• •••• •••• ${digits.slice(-4)}`
-          } else if (digits.length === 17) {
-            return `••••• ••••• •• ${digits.slice(-2)}`
-          } else if (digits.length === 18) {
-            return `••••• ••••• ••• ${digits.slice(-3)}`
-          } else if (digits.length === 19) {
-            return `•••••• •••••• •${digits.slice(-1)}`
-          }
-          return `•••• •••• •••• ${digits.slice(-4)}`
-        }
-      }
-    }
-
-    // 默认格式
-    return {
-      fontSize: '1.35rem',
-      letterSpacing: '0.04em',
-      format: (num: string) => {
-        const digits = num.replace(/\D/g, '')
-        return `•••• •••• •••• ${digits.slice(-4)}`
-      }
-    }
-  }
-
-  const cardNumberStyle = getCardNumberStyle()
-  const displayCardNumber = cardNumberStyle.format(card.cardNumber)
+  const displayCardNumber = maskCardNumber(card.cardNumber)
 
   return (
     <div className="flex-shrink-0 w-80 mx-3" style={{ pointerEvents: 'none' }}>
@@ -369,52 +280,21 @@ const DisplayCard = memo(function DisplayCard({ card }: { card: BankCard }) {
 
 export const CardCarousel = memo(function CardCarousel() {
   const [cards, setCards] = useState<BankCard[]>([])
-  const [visibleCards, setVisibleCards] = useState<BankCard[]>([])
 
   useEffect(() => {
     // 生成12张示例卡片，用于循环滚动
     const sampleCards = generateSampleCards(12)
     setCards(sampleCards)
-
-    // 初始显示所有卡片（两组用于无缝循环）
-    setVisibleCards([...sampleCards, ...sampleCards])
   }, [])
 
-  // 使用 Intersection Observer 实现懒加载
-  useEffect(() => {
-    if (cards.length === 0) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // 当最后一组卡片进入视口时，添加更多卡片
-            const lastCardId = entry.target.getAttribute('data-card-id')
-            if (lastCardId === `sample-${cards.length - 1}-2`) {
-              // 添加第三组卡片以实现真正的无限循环
-              setVisibleCards((prev) => [...prev, ...cards])
-            }
-          }
-        })
-      },
-      { threshold: 0.1 }
-    )
-
-    // 观察最后一张卡片
-    const lastCardElement = document.querySelector(`[data-card-id="sample-${cards.length - 1}-2"]`)
-    if (lastCardElement) {
-      observer.observe(lastCardElement)
-    }
-
-    return () => observer.disconnect()
-  }, [cards])
+  const loopCards = cards.length ? [...cards, ...cards] : []
 
   return (
     <div className="w-full overflow-hidden mt-8 mb-4">
       {/* 滚动容器 - 使用 CSS 动画实现平滑循环 */}
       <div className="flex animate-scroll">
-        {visibleCards.map((card, index) => (
-          <div key={`${card.id}-${index}`} data-card-id={`${card.id}-${index}`}>
+        {loopCards.map((card, index) => (
+          <div key={`${card.id}-${index}`}>
             <DisplayCard card={card} />
           </div>
         ))}
