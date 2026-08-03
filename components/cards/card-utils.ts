@@ -49,9 +49,7 @@ export function isCardNumberValidForNetwork(cardNumber: string, network: string)
   const s = cardNumber.replace(/\D/g, "")
   const len = s.length
   const prefix2 = Number.parseInt(s.slice(0, 2) || "0", 10)
-  const prefix3 = Number.parseInt(s.slice(0, 3) || "0", 10)
   const prefix4 = Number.parseInt(s.slice(0, 4) || "0", 10)
-  const prefix6 = Number.parseInt(s.slice(0, 6) || "0", 10)
 
   switch (network) {
     case "Visa":

@@ -1,4 +1,3 @@
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { AlertTriangle, ExternalLink } from "lucide-react";

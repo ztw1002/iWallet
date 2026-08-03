@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2, Copy, Edit2, Shield, Trash2, Circle, Eye, EyeOff } from "lucide-react"
+import { Copy, Edit2, Trash2, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
@@ -13,8 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { currency, GRADIENTS, maskCardNumber } from "./card-utils"
+import { GRADIENTS } from "./card-utils"
 import type { BankCard } from "./card-types"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"

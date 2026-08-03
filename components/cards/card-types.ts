@@ -14,3 +14,10 @@ export type BankCard = {
   createdAt: string
   updatedAt: string
 }
+
+export type Card = BankCard & {
+  expiryDate?: string
+  cardholderName?: string
+  notes?: string
+  isFavorite?: boolean
+}

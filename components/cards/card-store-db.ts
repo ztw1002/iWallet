@@ -4,8 +4,6 @@ import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import type { Card } from "./card-types"
 import { cardService } from "@/lib/supabase/database"
-import { useAuth } from "@/lib/auth-context"
-import { useToast } from "@/hooks/use-toast"
 
 type Store = {
   cards: Card[]
@@ -219,7 +217,7 @@ export const useCardStoreDB = create<Store>()(
           const queryLower = query.toLowerCase()
           return get().cards.filter(card => 
             card.cardNumber.toLowerCase().includes(queryLower) ||
-            card.nickname.toLowerCase().includes(queryLower) ||
+            (card.nickname || '').toLowerCase().includes(queryLower) ||
             card.network.toLowerCase().includes(queryLower)
           )
         }
@@ -265,7 +263,7 @@ export const useCardStoreDB = create<Store>()(
           set({ loading: true, error: null })
           
           // 批量创建卡片
-          const createdCards = []
+          const createdCards: Card[] = []
           for (const card of cards) {
             try {
               const cardData = {

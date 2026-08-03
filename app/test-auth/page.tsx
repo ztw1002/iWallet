@@ -48,7 +48,7 @@ function TestAuthContent() {
   const refreshSession = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase.auth.refreshSession()
+      const { error } = await supabase.auth.refreshSession()
       if (error) throw error
       
       toast({

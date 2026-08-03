@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { User, LogIn, UserPlus, Shield } from "lucide-react"
+import { LogIn, UserPlus, Shield } from "lucide-react"
 import Link from "next/link"
 
 export function AuthStatus() {
@@ -54,14 +54,6 @@ export function AuthStatus() {
                 未验证
               </Badge>
             )}
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button asChild size="sm">
-              {/* <Link href="/protected">
-                <Shield className="mr-2 h-4 w-4" />
-                个人中心
-              </Link> */}
-            </Button>
           </div>
         </CardContent>
       </Card>

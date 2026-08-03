@@ -398,24 +398,6 @@ export class CardService {
   private mapDatabaseCardsToCards(dbCards: DatabaseCard[]): Card[] {
     return dbCards.map(dbCard => this.mapDatabaseCardToCard(dbCard))
   }
-
-  // 数据映射：前端格式 -> 数据库格式
-  private mapCardToDatabaseCard(card: Card): Omit<DatabaseCard, 'id' | 'user_id' | 'created_at' | 'updated_at'> {
-    return {
-      card_number: (card.cardNumber || '').replace(/\D/g, ''),
-      nickname: card.nickname || undefined,
-      network: card.network,
-      level: card.level,
-      color: (card as any).color,
-      annual_fee_waived: (card as any).annualFeeWaived ?? true,
-      annual_fee_condition: (card as any).annualFeeCondition || undefined,
-      limit_amount: card.limit,
-      expiry_date: (card as any).expiryDate || undefined,
-      cardholder_name: (card as any).cardholderName || undefined,
-      notes: (card as any).notes || undefined,
-      is_favorite: (card as any).isFavorite || false
-    } as any
-  }
 }
 
 // 导出单例实例

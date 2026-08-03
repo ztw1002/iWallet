@@ -9,9 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { GRADIENTS, defaultGradientByNetwork, formatCardNumberDisplay, luhnCheck, currency, isCardNumberValidForNetwork } from "./card-utils"
+import { GRADIENTS, formatCardNumberDisplay, luhnCheck, currency, isCardNumberValidForNetwork } from "./card-utils"
 import type { CardLevel, CardNetwork } from "./card-types"
 import { useCardStoreDB } from "./card-store-db"
 import { Sparkles, Loader2 } from "lucide-react"
@@ -48,7 +47,7 @@ type FormValues = z.infer<typeof schema>
 
 export function CardFormDialog(props: { open: boolean; onOpenChange: (v: boolean) => void; editId: string | null }) {
   const { toast } = useToast()
-  const { addCard, updateCard, cards, loading } = useCardStoreDB()
+  const { addCard, updateCard, cards } = useCardStoreDB()
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const editing = useMemo(() => cards.find((c) => c.id === props.editId) ?? null, [cards, props.editId])

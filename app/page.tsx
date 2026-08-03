@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast"
 import { EnvVarWarning } from "@/components/env-var-warning"
 import { useAuth } from "@/lib/auth-context"
 import { LandingPage } from "@/components/landing-page"
+import { AIAssistant } from "@/components/ai-assistant"
 
 // 问候语组件
 function Greeting() {
@@ -95,6 +96,7 @@ export default function Page() {
           <>
             <Greeting />
             <Dashboard />
+            <AIAssistant />
           </>
         )}
       </div>
