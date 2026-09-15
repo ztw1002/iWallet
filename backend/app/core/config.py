@@ -19,6 +19,11 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @property
+    def frontend_origins(self) -> list[str]:
+        origins = [origin.strip() for origin in self.frontend_origin.split(",")]
+        return [origin for origin in origins if origin]
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -58,6 +58,12 @@ DEEPSEEK_MODEL=deepseek-chat
 FRONTEND_ORIGIN=https://your-vercel-domain.vercel.app
 ```
 
+Use commas when multiple frontend domains need access:
+
+```env
+FRONTEND_ORIGIN=https://your-production-domain.com,https://your-preview-domain.vercel.app
+```
+
 Frontend Vercel variable:
 
 ```env
