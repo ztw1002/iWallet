@@ -5,6 +5,7 @@ import { Bot, ChevronRight, Loader2, MessageSquareText, Send, Trash2, X } from "
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
+import { createClient } from "@/lib/supabase/client"
 
 type AssistantMessage = {
   id: string
@@ -50,15 +51,27 @@ export function AIAssistant() {
     if (!content || loading) return
 
     const userMessage = createMessage("user", content)
-    setMessages((current) => [...current, userMessage])
+    const assistantMessage = createMessage("assistant", "")
+    setMessages((current) => [...current, userMessage, assistantMessage])
     setInput("")
     setLoading(true)
 
     try {
-      const response = await fetch("/api/ai/chat", {
+      const supabase = createClient()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        throw new Error("未登录，请先登录后再使用 AI 助手。")
+      }
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
+      const response = await fetch(`${apiBaseUrl.replace(/\/$/, "")}/api/ai/chat/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           message: content,
@@ -66,16 +79,56 @@ export function AIAssistant() {
         }),
       })
 
-      const result = await response.json().catch(() => null)
-
       if (!response.ok) {
-        throw new Error(result?.error || "AI 助手请求失败")
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.detail || result?.error || "AI 助手请求失败")
       }
 
-      setMessages((current) => [...current, createMessage("assistant", result.answer)])
+      if (!response.body) {
+        throw new Error("AI 助手没有返回流式内容")
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const events = buffer.split("\n\n")
+        buffer = events.pop() || ""
+
+        for (const eventText of events) {
+          const eventName = eventText.match(/^event: (.+)$/m)?.[1]
+          const dataLine = eventText.match(/^data: (.+)$/m)?.[1]
+          if (!eventName || dataLine === undefined) continue
+
+          const data = JSON.parse(dataLine)
+          if (eventName === "token") {
+            setMessages((current) =>
+              current.map((message) =>
+                message.id === assistantMessage.id
+                  ? { ...message, content: message.content + data }
+                  : message,
+              ),
+            )
+          }
+          if (eventName === "error") {
+            throw new Error(data || "AI 助手请求失败")
+          }
+        }
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "AI 助手请求失败"
-      setMessages((current) => [...current, createMessage("assistant", errorMessage)])
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === assistantMessage.id
+            ? { ...message, content: errorMessage }
+            : message,
+        ),
+      )
     } finally {
       setLoading(false)
       requestAnimationFrame(() => textareaRef.current?.focus())
